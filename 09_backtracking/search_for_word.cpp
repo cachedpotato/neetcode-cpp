@@ -6,6 +6,29 @@
 
 using namespace std;
 
+void dfs(int i, int j, int n, vector<vector<char>>& board, string& word, set<tuple<int, int>>& visited, bool& res);
+bool exist(vector<vector<char>>& board, string word);
+bool dfs2(
+  int i, int j, int n, int numRow, int numCol,
+  vector<vector<char>>& board,
+  string& word
+);
+bool exist2(vector<vector<char>>& board, string word);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int main() {
+  vector<vector<char>> board = {
+    {'A','B','C','E'},
+    {'S','F','C','S'},
+    {'A','D','E','E'}
+  };
+  string word = "ABCCED";
+
+  bool e = exist(board, word);
+  std::cout << e << std::endl;
+  bool ee = exist2(board, word);
+  std::cout << ee << std::endl;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void dfs(int i, int j, int n, vector<vector<char>>& board, string& word, set<tuple <int, int>>& visited, bool& res) {
   int size = word.size();
   if (n == size - 1) {res = true; return;}
@@ -53,15 +76,52 @@ bool exist(vector<vector<char>>& board, string word) {
 
   return false;
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool dfs2(
+  int i, int j, int n, int numRow, int numCol,
+  vector<vector<char>>& board,
+  string& word 
+) {
+  if (
+    i < 0 || i >= numRow || 
+    j < 0 || j >= numCol || 
+    board[i][j] != word[n]
+  ) {
+    return false;
+  }
 
-int main() {
-  vector<vector<char>> board = {
-    {'A','B','C','E'},
-    {'S','F','C','S'},
-    {'A','D','E','E'}
-  };
-  string word = "ABCCED";
+  if (n == word.size() - 1) {return true;}
 
-  bool e = exist(board, word);
-  std::cout << e << std::endl;
+  //instead of keeping a set to track visited cells
+  //change the board itself
+  board[i][j] == '#';
+  
+  if (
+    dfs2(i + 1, j, n + 1, numRow, numCol, board, word) ||
+    dfs2(i - 1, j, n + 1, numRow, numCol, board, word) ||
+    dfs2(i, j + 1, n + 1, numRow, numCol, board, word) ||
+    dfs2(i, j - 1, n + 1, numRow, numCol, board, word)
+  ) {
+    return true;
+  }
+
+  //if we couldn't find a match - revert the board
+  //back to previous state
+  board[i][j] = word[n];
+  return false;
+}
+
+bool exist2(vector<vector<char>>& board, string word) {
+  int numRow = board.size();
+  int numCol = board[0].size();
+  int n = 0; //index
+
+  for (int i = 0; i < numRow; i++) {
+    for (int j = 0; j < numCol; j++) {
+      if (board[i][j] == word[0]) {
+        if (dfs2(i, j, n, numRow, numCol, board, word)) {return true;}
+      }
+    }
+  }
+  return false;
 }
